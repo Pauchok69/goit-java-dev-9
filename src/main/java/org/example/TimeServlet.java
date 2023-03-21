@@ -8,14 +8,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
-import org.thymeleaf.templateresolver.FileTemplateResolver;
 
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
 
 @WebServlet(urlPatterns = "/time")
@@ -40,27 +37,14 @@ public class TimeServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-//        Optional<String> timezoneOptional = Optional.ofNullable(req.getParameter(QUERY_PARAM_TIMEZONE));
-//        ZoneId zoneId = ZoneId.of(timezoneOptional.orElse(DEFAULT_TIME_ZONE));
-//        ZonedDateTime now = ZonedDateTime.now(zoneId);
-//
-//        resp.setContentType("text/html");
-//        resp.setCharacterEncoding("utf-8");
-//        resp.getWriter().write(now.format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
-//        resp.getWriter().close();
+        Optional<String> timezoneOptional = Optional.ofNullable(req.getParameter(QUERY_PARAM_TIMEZONE));
+        ZoneId zoneId = ZoneId.of(timezoneOptional.orElse(DEFAULT_TIME_ZONE));
+        ZonedDateTime now = ZonedDateTime.now(zoneId);
+
         resp.setContentType("text/html");
 
-        Map<String, String[]> parameterMap = req.getParameterMap();
-
-        Map<String, Object> params = new LinkedHashMap<>();
-        for (Map.Entry<String, String[]> keyValue : parameterMap.entrySet()) {
-            params.put(keyValue.getKey(), keyValue.getValue()[0]);
-        }
-
-        Context simpleContext = new Context(
-                req.getLocale(),
-                Map.of("queryParams", params)
-        );
+        Context simpleContext = new Context(req.getLocale());
+        simpleContext.setVariable("time", now.format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
 
         engine.process("time", simpleContext, resp.getWriter());
         resp.getWriter().close();
